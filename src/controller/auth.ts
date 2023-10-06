@@ -21,7 +21,13 @@ export const login = async (req: express.Request, res: express.Response) => {
             return res.sendStatus(403)
         }
 
+        const salt = random()
+        user.authentication.sessionToken = generateAuth(salt, user._id.toString())
+        await user.save();
 
+        res.cookie("APP-AUTH", user.authentication.sessionToken, { domain: 'localhost', path: '/' })
+
+        return res.status(200).json(user).end();
     } catch(error) {
         console.log(error);
         return res.sendStatus(400);
@@ -51,8 +57,7 @@ export const register = async (req: express.Request, res: express.Response) => {
                 password: generateAuth(salt, password)
             }
         })
-        console.log("all good")
-        return res.sendStatus(200)
+        return res.status(200).json(user).end()
     } catch(error) {
         console.error(error)
         return res.sendStatus(400)
